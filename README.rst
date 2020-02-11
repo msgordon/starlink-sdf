@@ -16,8 +16,10 @@ I am not associated with Starlink or JCMT.  I just wanted a quick, light-weight,
 
 Installation
 ************
+
 The package can be cloned from git and installed via::
   python setup.py install
+
 or::
   python setup.py install --prefix<installation dir>
 
@@ -55,7 +57,6 @@ To get all the supported extensions in one shot, use sdf.open() as shown above.
 
 Installation of this module also adds a command-line program to your Python bin path, sdf2fits.  This program takes an input the .sdf filename, and optionally an output fits file.  For more usage information, invoke it with the `-h` switch
 
-::
    usage: sdf2fits [-h] [-c] filename [outfile]
 
    Convert sdf/ndf to fits
