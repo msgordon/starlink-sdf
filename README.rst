@@ -18,9 +18,11 @@ Installation
 ************
 
 The package can be cloned from git and installed via::
+  
   python setup.py install
 
 or::
+  
   python setup.py install --prefix<installation dir>
 
 It can also be installed directly from this repository (recommended) as::
