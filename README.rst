@@ -23,7 +23,7 @@ The package can be cloned from git and installed via::
 
 or::
   
-  python setup.py install --prefix<installation dir>
+  python setup.py install --prefix=<installation dir>
 
 It can also be installed directly from this repository (recommended) as::
 
@@ -41,7 +41,7 @@ The interface is designed to match closely with astropy.io.fits::
 In this case, a fits.HDUList object is returned, in the same manner as
 fits.open(). Similar convenience functions exist as well::
 
-  hdr = sdf.getheader(sdf_image_filename)  # get default HDU, i.e. primary HDU's header
+  hdr = sdf.getheader(sdf_image_filename)     # get default HDU, i.e. primary HDU's header
   hdr = sdf.getheader(sdf_image_filename, 0)  # get primary HDU's header
   hdr = sdf.getheader(sdf_image_filename, 1)  # get first HDU's header
   hdr = sdf.getheader(sdf_image_filename, 'VARIANCE')  # get HDU header with name 'VARIANCE'
