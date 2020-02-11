@@ -57,14 +57,16 @@ To get all the supported extensions in one shot, use sdf.open() as shown above.
 
 Installation of this module also adds a command-line program to your Python bin path, sdf2fits.  This program takes an input the .sdf filename, and optionally an output fits file.  For more usage information, invoke it with the `-h` switch
 
+
+   sdf2fits -h
+   
    usage: sdf2fits [-h] [-c] filename [outfile]
 
    Convert sdf/ndf to fits
    
    positional arguments:
      filename       Input sdf file
-     outfile        Optional output file. If not specified, file will have input
-                    name with .fits extension
+     outfile        Optional output file. If not specified, file will have input name with .fits extension
    
    optional arguments:
      -h, --help     show this help message and exit
