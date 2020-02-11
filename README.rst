@@ -63,12 +63,3 @@ Installation of this module also adds a command-line program to your Python bin 
    usage: sdf2fits [-h] [-c] filename [outfile]
 
    Convert sdf/ndf to fits
-   
-   positional arguments:
->     filename       Input sdf file
->     outfile        Optional output file. If not specified, file will have input name with .fits extension
-   
-   optional arguments:
-     -h, --help     show this help message and exit
-     -c, --clobber  Clobber/overwrite output file.
-
