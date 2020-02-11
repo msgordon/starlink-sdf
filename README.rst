@@ -29,7 +29,7 @@ It can also be installed directly from this repository (recommended) as::
 
   pip install git+https://github.com/msgordon/starlink-sdf.git
 
-The necessary dependencies (astropy, `starlink-pyast <https://github.com/timj/starlink-pyast>`_,`starlink-pyhds <https://github.com/sfgraves/starlink-pyhds>`_) will be downloaded and installed from pypi.  Note that the Starlink AST and HDS dependencies may take some time to compile; however, a full Starlink software installation is not required.
+The necessary dependencies (astropy, `starlink-pyast <https://github.com/timj/starlink-pyast>`_, `starlink-pyhds <https://github.com/sfgraves/starlink-pyhds>`_) will be downloaded and installed from pypi.  Note that the Starlink AST and HDS dependencies may take some time to compile; however, a full Starlink software installation is not required.
   
 Usage
 *****
