@@ -9,7 +9,7 @@ This project is based on `starlink-pyhds <https://github.com/sfgraves/starlink-p
 Note that this package is not well-tested or mature.  It only provides access
 to JCMT/SCUBA .sdf files, and the conversion is not complete.  The NDF HISTORY
 records are not preserved, though the main data, header, and WCS information
-are extracted correctly.  Currently, only the DATA_ARRAY, VARIANCE, and QUALITY maps are pulled from the HDS file.
+are extracted correctly.  Currently, only the DATA_ARRAY, VARIANCE, QUALITY, EXP_TIME, and WEIGHTS maps are pulled from the HDS file.
 
 I am not associated with Starlink or JCMT.  I just wanted a quick, light-weight, pythonic interface to the NDF/SDF file format that was free of the entire Starlink architecture.
 
@@ -46,8 +46,7 @@ fits.open(). Similar convenience functions exist as well::
   hdr = sdf.getheader(sdf_image_filename, 1)  # get first HDU's header
   hdr = sdf.getheader(sdf_image_filename, 'VARIANCE')  # get HDU header with name 'VARIANCE'
 
-Note that for the last example, only PRIMARY (DATA_ARRAY), VARIANCE, and QUALITY
-from JCMT files are implemented.
+Note that for the last example, only PRIMARY (DATA_ARRAY), VARIANCE, QUALITY, EXP_TIME, and WEIGHTS maps from JCMT files are implemented.
 
 The function getdata() gets the data of an HDU. Similar to getheader(), it only requires the input .sdf file name while the extension is specified through the optional arguments. It does have one extra optional argument, header. If header is set to True, this function will return both data and header, otherwise only data is returned::
 

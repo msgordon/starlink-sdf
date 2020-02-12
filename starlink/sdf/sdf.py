@@ -29,7 +29,21 @@ DEF_PATH_MAP = {0:
                  'wcs_path':('WCS','DATA'),
                  'origin_path':('QUALITY','QUALITY','ORIGIN'),
                  'label_path':('LABEL',),
-                 'unit_path':None}
+                 'unit_path':None},
+                3:
+                {'data_path':('MORE','SMURF','EXP_TIME','DATA_ARRAY','DATA'),
+                 'header_path':None,
+                 'wcs_path':('WCS','DATA'),
+                 'origin_path':('MORE','SMURF','EXP_TIME','DATA_ARRAY','ORIGIN'),
+                 'label_path':('MORE','SMURF','EXP_TIME','LABEL'),
+                 'unit_path':('MORE','SMURF','EXP_TIME','UNITS')},
+                4:
+                {'data_path':('MORE','SMURF','WEIGHTS','DATA_ARRAY','DATA'),
+                 'header_path':None,
+                 'wcs_path':('WCS','DATA'),
+                 'origin_path':('MORE','SMURF','WEIGHTS','DATA_ARRAY','ORIGIN'),
+                 'label_path':('MORE','SMURF','WEIGHTS','LABEL'),
+                 'unit_path':('MORE','SMURF','WEIGHTS','UNITS')},
                 }
 NAME_PATH_MAP = {'DATA':DEF_PATH_MAP[0],
                  'DATA_ARRAY':DEF_PATH_MAP[0],
@@ -38,7 +52,11 @@ NAME_PATH_MAP = {'DATA':DEF_PATH_MAP[0],
                  'VARIANCE':DEF_PATH_MAP[1],
                  '1':DEF_PATH_MAP[1],
                  'QUALITY':DEF_PATH_MAP[2],
-                 '2':DEF_PATH_MAP[2]
+                 '2':DEF_PATH_MAP[2],
+                 'EXP_TIME':DEF_PATH_MAP[3],
+                 '3':DEF_PATH_MAP[3],
+                 'WEIGHTS':DEF_PATH_MAP[4],
+                 '4':DEF_PATH_MAP[4]
                  }
 
 def hds_path(root, path):
@@ -207,6 +225,8 @@ def extract_header(data, header_path=('MORE','FITS'),
             meta['BUNIT'] = ('(%s)**2'%bunit,'Units of the Variance array')
         if extname == 'DATA_ARRAY':
             meta['EXTNAME'] = 'PRIMARY'
+        if extname == 'MORE':
+            meta['EXTNAME'] = kwargs['data_path'][2]
     h.update(meta)
 
     if with_wcs:
@@ -274,6 +294,8 @@ def extract_data(data, data_path=('DATA_ARRAY','DATA'),
                       else data_path[0]
             if extname == 'DATA_ARRAY':
                 extname = 'PRIMARY'
+            if extname == 'MORE':
+                extname = data_path[2]
             hdu = fits.ImageHDU(data=data_array,header=header,name=extname)
             return hdu
         else:
@@ -290,6 +312,8 @@ def extract_data(data, data_path=('DATA_ARRAY','DATA'),
                       else data_path[0]
             if extname == 'DATA_ARRAY':
                 extname = 'PRIMARY'
+            if extname == 'MORE':
+                extname = data_path[2]
             hdu = fits.ImageHDU(data=data_array,header=header,name=extname)
             return hdu
         else:
@@ -305,7 +329,7 @@ def _getopts(ext=None):
         opts = NAME_PATH_MAP.get(ext)
 
     if opts is None:
-        raise InputError('Extension %s not understood. Only DATA, VARIANCE, and QUALITY are implemented' % str(ext))
+        raise InputError('Extension %s not understood. Only DATA, VARIANCE, QUALITY, EXP_TIME, and WEIGHTS are implemented' % str(ext))
 
     return opts
         
@@ -327,7 +351,7 @@ def getheader(filename, *args):
 
 def sdfopen(filename):
     """High-level function open sdf as hdulist"""
-    exts = ('DATA','VARIANCE','QUALITY')
+    exts = ('DATA','VARIANCE','QUALITY','EXP_TIME','WEIGHTS')
 
     hd = hds.open(filename,'r')
 
