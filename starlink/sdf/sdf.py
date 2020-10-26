@@ -342,20 +342,30 @@ def getdata(filename, *args, header=None, as_hdu=False):
     if as_hdu:
         opts['as_hdu'] = True
 
-    return extract_data(filename, **opts)
+    try:
+        data = extract_data(filename, **opts)
+    except hds.error:
+        data = None
+    return data
 
 def getheader(filename, *args):
     """High-level function to get header from sdf"""
     opts = _getopts(*args)
-    return extract_header(filename, **opts)
 
-def sdfopen(filename):
+    try:
+        hdr = extract_header(filename, **opts)
+    except hds.error:
+        hdr = None
+    return hdr
+
+def sdfopen(filename, exts=('DATA','VARIANCE','QUALITY','EXP_TIME','WEIGHTS')):
     """High-level function open sdf as hdulist"""
-    exts = ('DATA','VARIANCE','QUALITY','EXP_TIME','WEIGHTS')
 
     hd = hds.open(filename,'r')
-
-    hdlist = [getdata(hd,ext,as_hdu=True) for ext in exts]
+    
+    hdlist = (getdata(hd,ext,as_hdu=True) for ext in exts)
+    hdlist = filter(lambda h: h is not None, hdlist)
+    hdlist = list(hdlist)
     hdlist[0] = fits.PrimaryHDU(data=hdlist[0].data,
                                 header=hdlist[0].header)
     hdulist = fits.HDUList(hdus=hdlist)
