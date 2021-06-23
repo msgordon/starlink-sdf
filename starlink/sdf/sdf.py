@@ -3,7 +3,7 @@ from astropy.io import fits
 from astropy.wcs import WCS,FITSFixedWarning
 import numpy as np
 from pathlib import Path
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile,TemporaryDirectory
 import argparse
 #import warnings
 #warnings.filterwarnings('ignore',category=FITSFixedWarning)
@@ -171,8 +171,9 @@ def extract_wcs(data, wcs_path=('WCS','DATA'),**kwargs):
     wcsstring = '\n'.join(wcsdat)
 
     # open tempfile for Ast.Channel
-    with NamedTemporaryFile('w') as f:
-        f.write(wcsstring)
+    with TemporaryDirectory(prefix='starlink') as d:
+        with NamedTemporaryFile('w+t',dir=d,delete=False) as f:
+            f.write(wcsstring)
         c = Ast.Channel()
         c.set('SourceFile=%s' % f.name)
         fs = c.read()
