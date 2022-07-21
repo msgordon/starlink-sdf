@@ -59,6 +59,14 @@ NAME_PATH_MAP = {'DATA':DEF_PATH_MAP[0],
                  '4':DEF_PATH_MAP[4]
                  }
 
+UKIRT_DEF_PATH_MAP = {0:{'data_path':('I1','DATA_ARRAY','DATA'),
+                         'header_path':('HEADER','MORE','FITS'),
+                         'wcs_path':('HEADER','MORE','FITS'),
+                         'origin_path':('I1','DATA_ARRAY','ORIGIN'),
+                         'label_path':None,
+                         'unit_path':None}
+                      }
+
 def hds_path(root, path):
     """Recursively find on root"""
     if isinstance(path,str):
@@ -73,6 +81,7 @@ def hds_path(root, path):
             node = root
         else:
             node = root.find(path[0])
+            
         return hds_path(node,path[1:])
 
 
@@ -170,18 +179,26 @@ def extract_wcs(data, wcs_path=('WCS','DATA'),**kwargs):
     wcsdat = np.delete(np.array(wcsdat),plus_idx)
     wcsstring = '\n'.join(wcsdat)
 
-    # open tempfile for Ast.Channel
-    with TemporaryDirectory(prefix='starlink') as d:
-        with NamedTemporaryFile('w+t',dir=d,delete=False) as f:
-            f.write(wcsstring)
-        c = Ast.Channel()
-        c.set('SourceFile=%s' % f.name)
-        fs = c.read()
+    try:
+        # open tempfile for Ast.Channel
+        with TemporaryDirectory(prefix='starlink') as d:
+            with NamedTemporaryFile('w+t',dir=d,delete=False) as f:
+                f.write(wcsstring)
+            c = Ast.Channel()
+            c.set('SourceFile=%s' % f.name)
+            fs = c.read()
+            
 
-    # create hdu for FitsChan
-    hdu = fits.PrimaryHDU()
-    Atl.writefitswcs(fs, hdu)
-    wcs = WCS(hdu.header)
+        # create hdu for FitsChan
+        hdu = fits.PrimaryHDU()
+        Atl.writefitswcs(fs, hdu)
+        wcs = WCS(hdu.header)
+
+    except Ast.BADIN:
+        # likely a UKIRT file, in which case we can just read the string as wcs
+        h = fits.Header.fromstring(wcsstring, sep='\n')
+        wcs = WCS(h)
+        
     return wcs
 
 def extract_header(data, header_path=('MORE','FITS'),
@@ -334,19 +351,25 @@ def _getopts(ext=None):
 
     return opts
         
-def getdata(filename, *args, header=None, as_hdu=False):
+def getdata(filename, ext, header=None, as_hdu=False):
     """High-level function to get data from sdf (and optionally the header)"""
-    opts = _getopts(*args)
+    if ext == 'ukirt':
+        opts = UKIRT_DEF_PATH_MAP[0]
+    else:
+        opts = _getopts(ext)
 
     if header:
         opts['with_header'] = True
     if as_hdu:
         opts['as_hdu'] = True
 
+
+    #data = extract_data(filename, **opts)
     try:
         data = extract_data(filename, **opts)
     except hds.error:
         data = None
+
     return data
 
 def getheader(filename, *args):
@@ -363,8 +386,12 @@ def sdfopen(filename, exts=('DATA','VARIANCE','QUALITY','EXP_TIME','WEIGHTS')):
     """High-level function open sdf as hdulist"""
 
     hd = hds.open(filename,'r')
+    hdlist = [getdata(hd,ext,as_hdu=True) for ext in exts]
     
-    hdlist = (getdata(hd,ext,as_hdu=True) for ext in exts)
+    if all([d is None for d in hdlist]):
+        # likely a ukirt structure, so repeat
+        hdlist = [getdata(hd, ext='ukirt', as_hdu=True)]
+
     hdlist = filter(lambda h: h is not None, hdlist)
     hdlist = list(hdlist)
     hdlist[0] = fits.PrimaryHDU(data=hdlist[0].data,
@@ -388,7 +415,8 @@ def main():
     hdu = sdfopen(args.filename)
     hdu.info()
     try:
-        hdu.writeto(args.outfile,overwrite=args.clobber)
+        hdu.writeto(args.outfile, overwrite=args.clobber,
+                    output_verify='silentfix')
         print('-> %s' % args.outfile)
     except OSError:
         print("ERROR:  File %s already exists. Use --clobber to overwrite." % args.filename)
