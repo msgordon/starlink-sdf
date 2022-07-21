@@ -218,7 +218,7 @@ def extract_header(data, header_path=('MORE','FITS'),
         # open data as hds
         data = hds.open(str(data), 'r')
         
-    if header_path:      
+    if header_path:
         hnode = hds_path(data, header_path)
         hdat = hnode.get().astype(str)
         hstr = '\n'.join(hdat)
@@ -229,13 +229,19 @@ def extract_header(data, header_path=('MORE','FITS'),
     # add LABEL and BUNIT
     meta = {}
     if label_path:
-        lnode = hds_path(data, label_path)
-        label = lnode.get().decode()
-        meta['LABEL'] = (label,'Label of the primary array')
+        try:
+            lnode = hds_path(data, label_path)
+            label = lnode.get().decode()
+            meta['LABEL'] = (label,'Label of the primary array')
+        except:
+            meta['LABEL'] = ''
     if unit_path:
-        bnode = hds_path(data, unit_path)
-        bunit = bnode.get().decode()
-        meta['BUNIT'] = (bunit,'Units of the primary array')
+        try:
+            bnode = hds_path(data, unit_path)
+            bunit = bnode.get().decode()
+            meta['BUNIT'] = (bunit,'Units of the primary array')
+        except:
+            pass
     if kwargs.get('data_path'):
         extname = kwargs['data_path'][0]
         meta['EXTNAME'] = extname
@@ -248,7 +254,11 @@ def extract_header(data, header_path=('MORE','FITS'),
     h.update(meta)
 
     if with_wcs:
-        wcs = extract_wcs(data, wcs_path)
+        try:
+            wcs = extract_wcs(data, wcs_path)
+        except:
+            wcs = extract_wcs(data, header_path)
+            
         hwcs = wcs.to_header()
 
         # add origin keywords
@@ -259,8 +269,12 @@ def extract_header(data, header_path=('MORE','FITS'),
         hwcs.update(ohdr)
 
         # finally, append original header
-        hwcs.update(h)
-        h = hwcs
+        try:
+            hwcs.update(h)
+            h = hwcs
+        except ValueError:
+            # issue with wcs conversion
+            return h
         
     return h
 
@@ -307,6 +321,7 @@ def extract_data(data, data_path=('DATA_ARRAY','DATA'),
                                 label_path=label_path,
                                 unit_path=unit_path,
                                 with_wcs=with_wcs)
+        
         if as_hdu:
             extname = header.get('EXTNAME') if header.get('EXTNAME') \
                       else data_path[0]
