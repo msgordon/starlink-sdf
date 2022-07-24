@@ -196,8 +196,11 @@ def extract_wcs(data, wcs_path=('WCS','DATA'),**kwargs):
 
     except Ast.BADIN:
         # likely a UKIRT file, in which case we can just read the string as wcs
-        h = fits.Header.fromstring(wcsstring, sep='\n')
-        wcs = WCS(h)
+        try:
+            h = fits.Header.fromstring(wcsstring, sep='\n')
+            wcs = WCS(h)
+        except:
+            wcs = None
         
     return wcs
 
@@ -258,6 +261,9 @@ def extract_header(data, header_path=('MORE','FITS'),
             wcs = extract_wcs(data, wcs_path)
         except:
             wcs = extract_wcs(data, header_path)
+            
+        if wcs is None:
+            return h
             
         hwcs = wcs.to_header()
 
@@ -377,9 +383,7 @@ def getdata(filename, ext, header=None, as_hdu=False):
         opts['with_header'] = True
     if as_hdu:
         opts['as_hdu'] = True
-
-
-    #data = extract_data(filename, **opts)
+        
     try:
         data = extract_data(filename, **opts)
     except hds.error:
